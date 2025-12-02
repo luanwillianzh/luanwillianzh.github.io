@@ -1,9 +1,42 @@
-<html>
-  <head>
-    <title>Spotify</title>
-    <meta charset="utf-8"/>
-  </head>
-  <body>
-    <iframe src="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=novatorem&show_offline=false&background_color=030303&interchange=false&bar_color=53b14f&bar_color_cover=false"></iframe>
-  </body>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Full-body iframe</title>
+  <style>
+    html,body { height:100%; margin:0; }
+    /* prefer dynamic viewport units for mobile */
+    iframe.fullpage {
+      position:fixed;
+      inset:0;               /* top:0; right:0; bottom:0; left:0 */
+      width:100vw;
+      height:100dvh;        /* fallback to 100vh if browser doesn't support */
+      border:0;
+      display:block;
+      background:transparent;
+      z-index:1;
+    }
+    /* fallback for older browsers */
+    @supports(not (height:100dvh)) {
+      iframe.fullpage { height:100vh; }
+    }
+  </style>
+</head>
+<body>
+  <iframe
+    class="fullpage"
+    src="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=novatorem&show_offline=false&background_color=030303&interchange=false&bar_color=53b14f&bar_color_cover=false"
+    allow="clipboard-write; fullscreen"
+    loading="lazy"
+    referrerpolicy="no-referrer"
+    title="Spotify GitHub Profile"
+  ></iframe>
+
+  <noscript>
+    <p style="margin:1rem">JavaScript is disabled — open the widget directly:
+      <a href="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=novatorem&show_offline=false&background_color=030303&interchange=false&bar_color=53b14f&bar_color_cover=false" target="_blank" rel="noopener">Open widget</a>
+    </p>
+  </noscript>
+</body>
 </html>
