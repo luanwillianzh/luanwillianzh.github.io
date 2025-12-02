@@ -26,7 +26,8 @@
 <body>
   <iframe
     class="fullpage"
-    src="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=novatorem&show_offline=false&background_color=030303&interchange=false&bar_color=53b14f&bar_color_cover=false"
+    id="spotifyFrame"
+    src="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=apple&show_offline=false&background_color=121212&interchange=false&profanity=false&mode=dark"
     allow="clipboard-write; fullscreen"
     loading="lazy"
     referrerpolicy="no-referrer"
@@ -38,5 +39,15 @@
       <a href="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=novatorem&show_offline=false&background_color=030303&interchange=false&bar_color=53b14f&bar_color_cover=false" target="_blank" rel="noopener">Open widget</a>
     </p>
   </noscript>
+  <script>
+  function reloadIframe() {
+    const f = document.getElementById("spotifyFrame");
+    // forces a reload without losing the original URL
+    f.src = f.src;
+  }
+  
+  // run every 5 seconds
+  setInterval(reloadIframe, 5000);
+  </script>
 </body>
 </html>
