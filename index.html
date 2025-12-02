@@ -3,51 +3,83 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Full-body iframe</title>
+  <title>Smooth Full-Viewport Iframe Refresh</title>
+
   <style>
-    html,body { height:100%; margin:0; }
-    /* prefer dynamic viewport units for mobile */
-    iframe.fullpage {
-      position:fixed;
-      inset:0;               /* top:0; right:0; bottom:0; left:0 */
-      width:100vw;
-      height:100dvh;        /* fallback to 100vh if browser doesn't support */
-      border:0;
-      display:block;
-      background:transparent;
-      z-index:1;
+    html, body {
+      margin:0;
+      padding:0;
+      height:100%;
+      background:#000;
     }
-    /* fallback for older browsers */
+
+    /* full viewport height */
+    body {
+      height:100dvh;
+    }
+
+    #frame-wrapper {
+      position:fixed;
+      inset:0;
+      width:100vw;
+      height:100dvh;
+      overflow:hidden;
+    }
+
     @supports(not (height:100dvh)) {
-      iframe.fullpage { height:100vh; }
+      /* fallback for browsers without dynamic viewport units */
+      #frame-wrapper {
+        height:100vh;
+      }
+    }
+
+    .swapframe {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:0;
+      opacity:0;
+      background:transparent;
+      transition: opacity 0.4s linear;
     }
   </style>
 </head>
-<body>
-  <iframe
-    class="fullpage"
-    id="spotifyFrame"
-    src="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=apple&show_offline=false&background_color=121212&interchange=false&profanity=false&mode=dark"
-    allow="clipboard-write; fullscreen"
-    loading="lazy"
-    referrerpolicy="no-referrer"
-    title="Spotify GitHub Profile"
-  ></iframe>
 
-  <noscript>
-    <p style="margin:1rem">JavaScript is disabled — open the widget directly:
-      <a href="https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=novatorem&show_offline=false&background_color=030303&interchange=false&bar_color=53b14f&bar_color_cover=false" target="_blank" rel="noopener">Open widget</a>
-    </p>
-  </noscript>
+<body>
+  <div id="frame-wrapper">
+    <iframe id="frameA" class="swapframe" style="opacity:1;"></iframe>
+    <iframe id="frameB" class="swapframe" style="opacity:0;"></iframe>
+  </div>
+
   <script>
-  function reloadIframe() {
-    const f = document.getElementById("spotifyFrame");
-    // forces a reload without losing the original URL
-    f.src = f.src;
-  }
-  
-  // run every 5 seconds
-  setInterval(reloadIframe, 5000);
+    const URL_BASE =
+      "https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=novatorem&show_offline=false&background_color=030303&interchange=false&bar_color=53b14f&bar_color_cover=false";
+
+    const frameA = document.getElementById("frameA");
+    const frameB = document.getElementById("frameB");
+
+    frameA.src = URL_BASE;
+
+    let active = frameA;
+    let buffer = frameB;
+
+    function smoothReload() {
+      const url = new URL(URL_BASE);
+      url.searchParams.set("_ts", Date.now());
+      buffer.src = url.toString();
+
+      buffer.onload = () => {
+        buffer.style.opacity = 1;
+        active.style.opacity = 0;
+
+        const tmp = active;
+        active = buffer;
+        buffer = tmp;
+      };
+    }
+
+    setInterval(smoothReload, 5000);
   </script>
 </body>
 </html>
