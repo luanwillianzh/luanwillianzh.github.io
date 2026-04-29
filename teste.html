@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Smooth Full-Viewport Iframe Refresh</title>
+
+  <style>
+    /* Reset everything */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden; /* prevents scrollbars */
+    }
+
+    /* Fullscreen wrapper */
+    #frame-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;      /* fallback */
+      height: 100dvh;     /* modern mobile fix */
+      overflow: hidden;
+    }
+
+    .swapframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      opacity: 0;
+      background: transparent;
+      transition: opacity 0.4s linear;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="frame-wrapper">
+    <iframe id="frameA" class="swapframe" style="opacity:1;"></iframe>
+    <iframe id="frameB" class="swapframe"></iframe>
+  </div>
+
+  <script>
+    const URL_BASE =
+      "https://spotify-github-profile.kittinanx.com/api/view?uid=31z7ojmfde6ue5wez4av4mmmjpxe&cover_image=true&theme=apple&show_offline=false&background_color=121212&interchange=false&profanity=false&mode=dark";
+
+    const frameA = document.getElementById("frameA");
+    const frameB = document.getElementById("frameB");
+
+    frameA.src = URL_BASE;
+
+    let active = frameA;
+    let buffer = frameB;
+
+    function smoothReload() {
+      const url = new URL(URL_BASE);
+      url.searchParams.set("_ts", Date.now());
+      buffer.src = url.toString();
+
+      buffer.onload = () => {
+        buffer.style.opacity = 1;
+        active.style.opacity = 0;
+
+        const tmp = active;
+        active = buffer;
+        buffer = tmp;
+      };
+    }
+
+    setInterval(smoothReload, 5000);
+  </script>
+</body>
+</html>
