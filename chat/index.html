@@ -2,23 +2,21 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Simple AI Chat</title>
+<title>Kindle AI Chat</title>
 
 <style>
 body {
     font-family: sans-serif;
     margin: 10px;
-    background: #fff;
-    color: #000;
 }
 
 #chat {
     border: 1px solid #000;
-    height: 300px;
+    height: 320px;
     overflow: auto;
     padding: 5px;
-    margin-bottom: 10px;
     white-space: pre-wrap;
+    margin-bottom: 10px;
 }
 
 textarea {
@@ -39,64 +37,236 @@ button {
 <div id="chat"></div>
 
 <textarea id="msg"></textarea>
+
 <button onclick="sendMsg()">Send</button>
+<button onclick="clearChat()">Clear Memory</button>
 
 <script>
 var API_URL = "https://hermes.ai.unturf.com/v1/chat/completions";
 var API_KEY = "YOUR_API_KEY";
 
-function add(text) {
-    var chat = document.getElementById("chat");
-    chat.innerHTML += text + "\n\n";
-    chat.scrollTop = chat.scrollHeight;
+/*
+Persistent conversation memory
+*/
+var messages = [
+    {
+        role: "system",
+        content: "You are a helpful assistant."
+    }
+];
+
+/*
+Load saved conversation
+*/
+try {
+
+    var saved =
+        localStorage.getItem("chat_memory");
+
+    if (saved) {
+        messages = JSON.parse(saved);
+    }
+
+} catch (e) {
 }
 
-function sendMsg() {
-    var msgBox = document.getElementById("msg");
-    var text = msgBox.value;
+/*
+Render messages
+*/
+function renderAll() {
 
-    if (!text) return;
+    var chat =
+        document.getElementById("chat");
+
+    chat.innerHTML = "";
+
+    for (var i = 0; i < messages.length; i++) {
+
+        var m = messages[i];
+
+        if (m.role == "user") {
+            add("You: " + m.content);
+        }
+
+        if (m.role == "assistant") {
+            add("AI: " + m.content);
+        }
+    }
+}
+
+/*
+Add text to screen
+*/
+function add(text) {
+
+    var chat =
+        document.getElementById("chat");
+
+    chat.innerHTML += text + "\n\n";
+
+    chat.scrollTop =
+        chat.scrollHeight;
+}
+
+/*
+Save memory
+*/
+function saveMemory() {
+
+    try {
+
+        localStorage.setItem(
+            "chat_memory",
+            JSON.stringify(messages)
+        );
+
+    } catch (e) {
+    }
+}
+
+/*
+Clear conversation
+*/
+function clearChat() {
+
+    messages = [
+        {
+            role: "system",
+            content: "You are a helpful assistant."
+        }
+    ];
+
+    saveMemory();
+
+    renderAll();
+}
+
+/*
+Limit history size
+*/
+function trimMessages() {
+
+    /*
+    Keep system prompt
+    Remove oldest pairs
+    */
+
+    while (messages.length > 12) {
+
+        messages.splice(1, 2);
+    }
+}
+
+/*
+Send message
+*/
+function sendMsg() {
+
+    var box =
+        document.getElementById("msg");
+
+    var text = box.value;
+
+    if (!text) {
+        return;
+    }
+
+    box.value = "";
+
+    /*
+    Save user message
+    */
+    messages.push({
+        role: "user",
+        content: text
+    });
+
+    trimMessages();
+
+    saveMemory();
 
     add("You: " + text);
-    msgBox.value = "";
 
     var xhr = new XMLHttpRequest();
 
-    xhr.open("POST", API_URL, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("Authorization", "Bearer " + API_KEY);
+    xhr.open(
+        "POST",
+        API_URL,
+        true
+    );
+
+    xhr.setRequestHeader(
+        "Content-Type",
+        "application/json"
+    );
+
+    xhr.setRequestHeader(
+        "Authorization",
+        "Bearer " + API_KEY
+    );
 
     xhr.onreadystatechange = function() {
+
         if (xhr.readyState == 4) {
+
             if (xhr.status == 200) {
+
                 try {
-                    var res = JSON.parse(xhr.responseText);
+
+                    var res =
+                        JSON.parse(
+                            xhr.responseText
+                        );
 
                     var reply =
-                        res.choices[0].message.content;
+                        res.choices[0]
+                        .message.content;
+
+                    /*
+                    Save assistant reply
+                    */
+                    messages.push({
+                        role: "assistant",
+                        content: reply
+                    });
+
+                    trimMessages();
+
+                    saveMemory();
 
                     add("AI: " + reply);
+
                 } catch (e) {
+
                     add("Parse error");
                 }
+
             } else {
-                add("HTTP Error: " + xhr.status);
+
+                add(
+                    "HTTP Error: " +
+                    xhr.status
+                );
             }
         }
     };
 
     var data = {
+
         model: "adamo1139/Hermes-3-Llama-3.1-8B-FP8-Dynamic",
-        messages: [
-            {
-                role: "user",
-                content: text
-            }
-        ]
+
+        messages: messages
     };
 
-    xhr.send(JSON.stringify(data));
+    xhr.send(
+        JSON.stringify(data)
+    );
 }
+
+/*
+Show old conversation on load
+*/
+renderAll();
 </script>
 
 </body>
